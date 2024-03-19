@@ -6,11 +6,14 @@ import { BiSearchAlt2 } from "react-icons/bi";
 import axios from "axios";
 import ChatListItem from "./ChatListItem"; // Renamed ChatLIstItem to ChatListItem
 import ChatListHeader from "./ChatListHeader";
+import { Audio } from 'react-loader-spinner'
+
 
 function ChatList() {
   const [allContacts, setAllContacts] = useState([]); // Renamed SetAllContacts to setAllContacts
   const [{ userInfo, contactsPage }, dispatch] = useStateProvider(); // Renamed contactsPage to contactsPage, SetAllContacts to setAllContacts
   const [pageType, setPageType] = useState("all-contacts");
+  const [loading,setLoading] = useState(false)
 
   // Function to handle setting contacts page to all contacts
   const handleAllContactsPage = useCallback(() => {
@@ -29,12 +32,15 @@ function ChatList() {
   // Fetch all contacts from the server
   useEffect(() => {
     const getContacts = async () => {
+      setLoading(true)
       try {
         const {
           data: { users },
         } = await axios.get(GET_ALL_CONTACTS);
         setAllContacts(users);
-      } catch (error) {
+      setLoading(false)
+    } catch (error) {
+        setLoading(false)
         console.error("Error fetching contacts:", error);
       }
     };
@@ -44,7 +50,21 @@ function ChatList() {
 
   return (
     <>
-      <ChatListHeader/>
+      {
+        loading ? (
+          <div className="flex flex-col items-center justify-center w-full h-screen">
+          <Audio
+          height="80"
+          width="80"
+          radius="9"
+          color={`black`}
+          ariaLabel="loading"
+          wrapperStyle
+          wrapperClass
+        /><h1 className="text-2xl ml-10">Loading Backend...</h1></div>
+        ) : (
+          <>
+            <ChatListHeader/>
     <div className="bg-white z-20 flex items-center justify-center h-[95%] w-full mt-[-2rem]">
       <div className="flex flex-col h-full lg:w-[50%] w-full lg:bg-bg-whitesmoke">
         {pageType === "all-contacts" && (
@@ -87,7 +107,9 @@ function ChatList() {
           </div>
         )}
       </div>
-    </div>
+    </div></>
+        )
+      }
     </>
   );
 }
